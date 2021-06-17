@@ -1,0 +1,185 @@
+-- Tables used
+SELECT * FROM TAB;
+SELECT * FROM EMPLOYEES;
+SELECT * FROM DEPARTMENTS;
+SELECT * FROM JOBS;
+SELECT * FROM EMP_DETAILS_VIEW;
+
+-- 1. 
+-- 성이 'King' 사용자의 정보를 출력하시오.
+SELECT * FROM EMPLOYEES WHERE LAST_NAME = 'King';
+
+-- 2. 
+-- 부서가 80, 90인 사용자의 부서정보를 출력하시오.
+SELECT * FROM DEPARTMENTS WHERE DEPARTMENT_ID IN(80, 90) ORDER BY DEPARTMENT_ID;
+
+SELECT * FROM EMPLOYEES E, DEPARTMENTS D
+WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID AND E.DEPARTMENT_ID IN (80, 90)
+ORDER BY E.DEPARTMENT_ID;
+
+-- 3. 
+-- 성이 'King'인 사용자의 부서명 정보를 출력하시오.
+SELECT FIRST_NAME, LAST_NAME, E.DEPARTMENT_ID, DEPARTMENT_NAME
+FROM EMPLOYEES E, DEPARTMENTS D
+WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID AND E.LAST_NAME = 'King';
+ 
+-- 4. 
+-- 성이 'kING'인 사용자의 사번(employees), 부서명(departments), 직무(job)를 출력하시오.
+SELECT EMPLOYEE_ID, DEPARTMENT_NAME, JOB_TITLE
+FROM EMPLOYEES E, DEPARTMENTS D, JOBS J
+WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID AND E.JOB_ID = J.JOB_ID AND E.LAST_NAME = 'King';
+
+-- 5. 
+-- employees 테이블명을 줄여서(alias) 표기하여 직원의 사번(employees), 부서명(departments), 직무(job)를 출력하시오. 
+SELECT EMPLOYEE_ID, DEPARTMENT_NAME, JOB_TITLE
+FROM EMPLOYEES E, DEPARTMENTS D, JOBS J
+WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID AND E.JOB_ID = J.JOB_ID;
+
+-- 6. 
+-- employees 테이블에서 성이 'King'인 사원의 메니저의 이름과 부서명을 출력하라.
+SELECT E2.FIRST_NAME, E2.LAST_NAME, DEPARTMENT_NAME
+FROM EMPLOYEES E1, EMPLOYEES E2, DEPARTMENTS D
+WHERE E1.MANAGER_ID = E2.EMPLOYEE_ID AND E1.LAST_NAME = 'King' AND E2.DEPARTMENT_ID = D.DEPARTMENT_ID;
+
+-- 7. 
+-- employees 테이블에서 성이 'Taylor'인 사원의 메니저의 이름과 직업을 출력하라.
+
+-- 성이 Taylor인 사원
+SELECT *
+FROM EMPLOYEES E, DEPARTMENTS D
+WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID AND E.LAST_NAME = 'Taylor';
+
+-- 해당 사원의 매니저
+SELECT E2.FIRST_NAME, E2.LAST_NAME, J.JOB_TITLE
+FROM EMPLOYEES E1, EMPLOYEES E2, JOBS J
+WHERE E1.MANAGER_ID = E2.EMPLOYEE_ID AND E1.LAST_NAME = 'Taylor' AND E2.JOB_ID = J.JOB_ID;
+
+-- 8. 
+-- 사원 중 평균 급여보다 큰 급여를 받는 사원정보를 출력하라.
+SELECT * FROM EMPLOYEES WHERE SALARY> (SELECT AVG(SALARY) FROM EMPLOYEES);
+ 
+-- 9. 
+-- 직무별 가장 많은 급여를 받는 사원 정보 출력하라.
+SELECT JOB_ID, MAX(SALARY) FROM EMPLOYEES GROUP BY JOB_ID;
+
+SELECT E1.* 
+FROM EMPLOYEES E1, (SELECT JOB_ID, MAX(SALARY) MS FROM EMPLOYEES GROUP BY JOB_ID) E2
+WHERE E1.JOB_ID = E2.JOB_ID AND E1.SALARY = E2.MS
+ORDER BY E1.JOB_ID;
+
+SELECT * FROM EMPLOYEES
+WHERE (JOB_ID, SALARY) IN (SELECT JOB_ID, MAX(SALARY) FROM EMPLOYEES GROUP BY JOB_ID);
+
+-- 10. 
+-- 성이 'King'인 사원과 같은 job의 사원을 출력하라.
+-- 단, 'King'은 제외 한다.
+
+-- 성이 'King' 사용자의 정보
+SELECT * FROM EMPLOYEES WHERE LAST_NAME = 'King';
+
+-- 성이 'King'인 사원과 같은 job의 사원('King' 제외)
+SELECT * FROM EMPLOYEES
+WHERE JOB_ID IN (SELECT JOB_ID FROM EMPLOYEES WHERE LAST_NAME = 'King') AND LAST_NAME NOT IN ('King');
+
+-- 11. 
+-- 성이 'King'인 사원중 많은 급여를 받는 사원보다 더 많은 급여를 받는 사원을 출력하라.
+SELECT * FROM EMPLOYEES;
+WHERE SALARY >  (SELECT MAX(SALARY) FROM EMPLOYEES WHERE LAST_NAME = 'King');
+
+-- 12. 
+-- 부서가 'Sales'인 부서에 근무하는 직원정보 출력하라.
+SELECT E.*
+FROM EMPLOYEES E, DEPARTMENTS D
+WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID AND D.DEPARTMENT_NAME = 'Sales';
+
+-- 13. 
+-- 최소 급여를 받는 사람의 이름과 급여 정보를 출력하라.
+SELECT FIRST_NAME, LAST_NAME, SALARY FROM EMPLOYEES
+WHERE SALARY = (SELECT MIN(SALARY) FROM EMPLOYEES);
+
+-- 14. 
+-- 평균 급여보다 많은 급여를 받는 직원의 정보를 출력하라.
+SELECT * FROM EMPLOYEES WHERE SALARY> (SELECT AVG(SALARY) FROM EMPLOYEES);
+ 
+
+/*
+ 15. ~  20. 미션 관련 참고 데이터
+
+## 회원관리 초기화데이터								
+아이디	비밀번호		이름		연락처			이메일			가입일		등급	마일리지	담당자
+user01	password01	홍길동	010-1234-1111	user01@work.com	2017.05.05	G	75000	
+user02	password02	강감찬	010-1234-1112	user02@work.com	2017.05.06	G	95000	
+user03	password03	이순신	010-1234-1113	user03@work.com	2017.05.07	G	3000	
+user04	password04	김유신	010-1234-1114	user04@work.com	2017.05.08	S			송중기
+user05	password05	유관순	010-1234-1115	user05@work.com	2017.05.09	A		
+
+## 게시글 관리 초기화데이터						
+게시번호	제목		내용						작성자	작성날짜			조회수	
+1		주말과제	회원도서관리DB설계			user05	2020.11.11		0	
+2		형상관리 	형상관리 소개				user04	2020.12.25		5	
+3		주말과제	화면정의서					user05	2021.02.14		0	
+4		과제제출	시간엄수					user05	2021.03.01		15	
+5		WEB참고	www.w3schools.com		user01	2021.05.26		5	
+*/
+
+-- 15. 제공된 회원 및 게시글 초기레코드 참고 데이터를 참고로하여 테이블을 생성하시오.
+CREATE TABLE MEMBER(
+    MEMBER_ID VARCHAR2(30),
+    MEMBER_PW VARCHAR2(20) NOT NULL,
+    NAME VARCHAR2(20),
+    MOBILE VARCHAR2(13) NOT NULL,
+    EMAIL VARCHAR2(30) NOT NULL,
+    ENTRY_DATE VARCHAR2(10) NOT NULL,
+    GRADE VARCHAR2(1) NOT NULL,
+    MILEAGE NUMBER(6),
+    MANAGER VARCHAR2(10)    
+);
+ALTER TABLE MEMBER ADD CONSTRAINT PK_MEMBER_ID PRIMARY KEY (MEMBER_ID);
+ALTER TABLE MEMBER ADD CONSTRAINT UK_MOBILE UNIQUE(MOBILE, EMAIL);
+
+CREATE TABLE NOTICE(
+    NOTICE_NO NUMBER(6),
+    TITLE VARCHAR2(30) NOT NULL,
+    CONTENT VARCHAR2(100),
+    MEMBER_ID VARCHAR2(30) NOT NULL,
+    NOTICE_DATE DATE NOT NULL,
+    HITS NUMBER(6)
+);
+ALTER TABLE NOTICE ADD CONSTRAINT PK_NOTICE_NO PRIMARY KEY(NOTICE_NO);
+ALTER TABLE NOTICE ADD CONSTRAINT FK_MEMBER_ID FOREIGN KEY(MEMBER_ID) REFERENCES MEMBER(MEMBER_ID);
+
+
+-- 16. 15에서 제공된 참고 데이터를 참고로하여 회원 레코드를 추가하시오.
+INSERT INTO MEMBER VALUES('user01', 'password01', '홍길동', '010-1234-1111', 'user01@work.com', '2017.05.05', 'G', 75000, NULL);
+INSERT INTO MEMBER VALUES('user02', 'password02', '강감찬', '010-1234-1112', 'user02@work.com', '2017.05.06', 'G', 95000, NULL);
+INSERT INTO MEMBER VALUES('user03', 'password03', '이순신', '010-1234-1113', 'user03@work.com', '2017.05.07', 'G', 3000, NULL);
+INSERT INTO MEMBER VALUES('user04', 'password04', '김유신', '010-1234-1114', 'user04@work.com', '2017.05.08', 'S', NULL, '송중기');
+INSERT INTO MEMBER VALUES('user05', 'password05', '유관순', '010-1234-1115', 'user05@work.com', '2017.05.09', 'A', NULL, NULL);
+
+-- 17. 15에서 제공된 참고 데이터를 참고로하여 게시글 레코드를 추가하시오.
+ INSERT INTO NOTICE VALUES(1, '주말과제', '회원도서관리DB설계', 'user05', '2020.11.11', 0);
+ INSERT INTO NOTICE VALUES(2, '형상관리', '형상관리 소개', 'user04', '2020.12.25', 5);
+ INSERT INTO NOTICE VALUES(3, '주말과제', '화면정의서', 'user05', '2021.02.14', 	0);
+ INSERT INTO NOTICE VALUES(4, '과제제출', '시간엄수', 'user05', '2021.03.01', 15);
+ INSERT INTO NOTICE VALUES(5, '	WEB참고', 'www.w3schools.com', 'user01', '2021.05.26', 5);
+  
+-- 18. 전체 회원 정보를 조회하시오.
+SELECT * FROM MEMBER;
+
+-- 19. 전체 게시글 정보를 조회하시오.
+SELECT * FROM NOTICE;
+ 
+-- 20. 회원 아이디 user05 가 작성한 게시글을 조회하시오.
+SELECT * FROM NOTICE WHERE MEMBER_ID = 'user05';
+
+-- 21. 제약관련 데이터 딕셔너리를 조인을 이용하여 다음의 제약 정보를 조회하시오.
+-- 제약 데이터 딕셔너리 : user_constraints, user_cons_columns
+-- 단, 테이블명, 제약타입 으로 정렬 조회하시오.
+-- 조회항목 : 테이블명, 제약타입, 제약명, 컬럼명
+SELECT * FROM USER_CONSTRAINTS;
+SELECT * FROM USER_CONS_COLUMNS;
+
+SELECT UC.TABLE_NAME, UC.CONSTRAINT_TYPE, UC.CONSTRAINT_NAME, UCC.COLUMN_NAME
+FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC
+WHERE UC.CONSTRAINT_NAME = UCC.CONSTRAINT_NAME
+ORDER BY TABLE_NAME, CONSTRAINT_TYPE;
